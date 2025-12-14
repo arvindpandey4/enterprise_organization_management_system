@@ -3,7 +3,7 @@ Main FastAPI application.
 Enterprise-grade multi-tenant organization management system.
 """
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 from contextlib import asynccontextmanager
@@ -18,8 +18,11 @@ from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
     print("🚀 Starting Organization Management System...")
-    await connect_to_mongo()
-    print("✅ Application ready!")
+    try:
+        await connect_to_mongo()
+        print("✅ Application ready!")
+    except Exception as e:
+        print(f"❌ Failed to connect to MongoDB: {e}")
     
     yield
     
@@ -52,15 +55,11 @@ app.include_router(auth.router)
 app.include_router(organizations.router)
 
 
-@app.get("/", tags=["Health"])
+@app.get("/", tags=["Health"], include_in_schema=False)
 async def root():
-    """Root endpoint - API health check."""
-    return {
-        "success": True,
-        "message": "Organization Management System API",
-        "version": settings.APP_VERSION,
-        "status": "operational"
-    }
+    """Root endpoint - Redirects to API documentation."""
+    return RedirectResponse(url="/docs")
+
 
 
 @app.get("/health", tags=["Health"])
