@@ -1,130 +1,203 @@
-# Snake & Ladder Application
+# 🏢 Enterprise Organization Management System
 
-This project is a simple, beginner-friendly Python Flask application that simulates the classic **Snake & Ladder** game. The application progressively implements all core use cases across seven versions (UC1–UC7). Each use case adds new game behavior while keeping the previous functionality intact.
+> **Production-Ready Multi-Tenant Backend Service**  
+> Built with **FastAPI**, **MongoDB**, and **Enterprise Best Practices**
 
-The application does not use a database or advanced frameworks. Everything is intentionally built using basic Python, simple game logic, and minimal Flask features.
-
----
-
-## 1. Project Overview
-
-This project implements the Snake & Ladder game logic in multiple steps:
-
-* **UC1:** Single-player game start at position 0
-* **UC2:** Add die roll (1–6)
-* **UC3:** Add movement options (No Play, Ladder, Snake)
-* **UC4:** Add snake negative position handling
-* **UC5:** Enforce exact finish rule (must land exactly on 100)
-* **UC6:** Show full report of every dice roll
-* **UC7:** Add two-player mode with alternated turns and shared game events
-
-Each use case is implemented in its own Flask file (`app_uc1.py` … `app_uc7.py`).
+[![Deploy with Vercel](https://vercel.com/button)]()
 
 ---
 
-## 2. How the Application Works
+## 📖 Table of Contents
+1. [Overview](#-overview)
+2. [Key Enterprise Features](#-key-enterprise-features)
+3. [Technology Stack](#-technology-stack)
+4. [Architecture](#-architecture)
+5. [Installation & Setup](#-installation--setup)
+6. [API Documentation & Examples](#-api-documentation--examples)
+7. [Project Structure](#-project-structure)
+8. [Troubleshooting](#-troubleshooting)
 
-### **Single Player Mode**
+---
 
-The game starts at **position 0**. On each turn:
+## 🌟 Overview
 
-1. A **die** is rolled (1–6)
-2. A **random option** is chosen:
+This is a robust, enterprise-grade backend service designed for managing organizations in a multi-tenant environment. Unlike simple CRUD applications, this system implements advanced architectural patterns used in real-world SaaS platforms like Stripe or Atlassian.
 
-   * No Play → player stays in the same position
-   * Ladder → move forward by die value
-   * Snake → move backward by die value
-3. If snake reduces position below 0 → reset to **0**
-4. Ladder overshoot beyond 100 → position does **not** change
-5. Game ends only when the player reaches **exactly 100**
-6. Every roll is recorded and displayed in simple print-style output
+It features a **Master Database** for metadata and **Dynamic Collections** for tenant data isolation, ensuring scalability and security.
 
-### **Two Player Mode**
+---
 
-Two players share the **same sequence of random events**:
+## 🚀 Key Enterprise Features
 
-* Player 1 plays odd-numbered rolls
-* Player 2 plays even-numbered rolls
-* Both use the same die results and options in the same order
-* The first player to reach **100** wins the game
+### 1. **Multi-Tenant Architecture**
+-   **Isolation**: Each organization gets its own dynamic MongoDB collection (e.g., `org_google`, `org_amazon`).
+-   **Scalability**: Prevents a single massive collection from slowing down queries.
+-   **Security**: Data leakage between tenants is architecturally minimized.
 
-Every roll prints:
+### 2. **Soft-Delete with Audit Trail** (Compliance Ready)
+-   **Metadata Retention**: Deleted organizations are flagged (`is_deleted=True`) in the master DB.
+-   **Resource Cleanup**: The actual dynamic collection is **hard-deleted** to free space.
+-   **Audit**: Records `deleted_at` and `deleted_by` (Admin ID) for regulatory compliance.
 
-```
-Total Dice Roll: <roll_number>
-Player: <Player 1 / Player 2>
-Position: <new_position>
+### 3. **Organization-Level Rate Limiting**
+-   **Fairness**: Rate limits are applied **per organization** (via JWT context), not just per IP.
+-   **Impact**: One abusive tenant cannot degrade performance for other tenants on the same network.
+-   **Configurable**: Limits (e.g., 100 req/min) are adjustable via environment variables.
+
+### 4. **Secure Authentication & Authorization**
+-   **JWT**: Stateless authentication with organization-scoped tokens.
+-   **Bcrypt**: Industry-standard password hashing.
+-   **Role-Based**: Admins can only modify their own organization's data.
+
+---
+
+## 💻 Technology Stack
+
+-   **Language**: Python 3.9+
+-   **Framework**: FastAPI (High performance, async)
+-   **Database**: MongoDB (v4.6+ driver, Async Motorola)
+-   **Validation**: Pydantic v2
+-   **Auth**: Python-JOSE (JWT), Passlib (Bcrypt)
+-   **Middleware**: SlowAPI (Rate limiting)
+
+---
+
+## 🏗 Architecture
+
+### Database Schema Design
+
+1.  **Master Collection (`organizations`)**:
+    -   Stores metadata: `name`, `admin_email`, `collection_name`, `is_deleted`.
+    -   Acts as the directory for all tenants.
+
+2.  **Dynamic Collections (`org_<name>`)**:
+    -   Created automatically when an organization is registered.
+    -   Stores tenant-specific data (e.g., Admin users, and future tenant entities).
+
+### Safe Data Migration
+-   When an organization name is updated, the system **automatically renames** the collection and migrates all data safely in a transaction-like sequence.
+
+---
+
+## 🛠 Installation & Setup
+
+### Prerequisites
+-   **Python 3.9+** installed/added to PATH (`python --version`)
+-   **MongoDB** installed and running (`net start MongoDB` or `mongod`)
+
+### Quick Start
+
+1.  **Clone the Repository**
+    ```powershell
+    cd Wedding_Backend
+    ```
+
+2.  **Run the Setup Script (Windows)**
+    ```powershell
+    .\setup.ps1
+    ```
+    *Alternatively, manually create venv and pip install -r requirements.txt*
+
+3.  **Start the Server**
+    ```powershell
+    .\start.bat
+    ```
+    *Or manually:* `uvicorn app.main:app --reload`
+
+### Configuration (`.env`)
+The setup script creates this automatically. Key variables:
+```env
+MONGODB_URL=mongodb://localhost:27017
+SECRET_KEY=<your_generated_secret_key>
+RATE_LIMIT_PER_ORG=100
 ```
 
 ---
 
-## 3. Flask in This Project
+## 📚 API Documentation & Examples
 
-Flask is a lightweight Python web framework that turns Python functions into web pages. Only the most basic parts of Flask are used here:
+**Interactive Docs**: Visit [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
 
-### **Flask()**
-
-Creates the application instance:
-
+### 1. Create Organization
+**POST** `/organizations/`
+```json
+// Request
+{
+  "name": "Tesla Inc",
+  "description": "Electric Vehicles",
+  "admin_email": "elon@tesla.com",
+  "admin_name": "Elon Musk",
+  "admin_password": "SecurePassword123!"
+}
 ```
-app = Flask(__name__)
+
+### 2. Admin Login
+**POST** `/auth/login`
+```json
+// Request
+{
+  "email": "elon@tesla.com",
+  "password": "SecurePassword123!"
+}
+
+// Response
+{
+  "success": true,
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1Ni...",
+    "admin_id": "...",
+    "organization_id": "..."
+  }
+}
 ```
 
-### **@app.route()**
+### 3. Update Organization
+**PUT** `/organizations/{id}` (Requires Auth Header)
+-   **Header**: `Authorization: Bearer <access_token>`
+-   **Body**:
+    ```json
+    { "name": "Tesla Motors", "description": "Updated Description" }
+    ```
+    *Note: Changing the name will trigger a Safe Data Migration.*
 
-Defines a URL path and connects it to a Python function.
-
-* `/` → home page (select single or two player mode)
-* `/play` → runs the game simulation and displays results
-
-### **render_template() / render_template_string()**
-
-Used to generate the HTML response. The result page prints lines in a terminal-like style.
-
-There are **no databases**, **no APIs**, and **no advanced Flask extensions** used.
+### 4. Delete Organization
+**DELETE** `/organizations/{id}` (Requires Auth Header)
+-   **Header**: `Authorization: Bearer <access_token>`
+-   **Effect**: Soft-deletes metadata, hard-deletes collection, logs action.
 
 ---
 
-## 4. Running the Application
-
-### Install dependencies
+## 📂 Project Structure
 
 ```
-pip install flask
-```
-
-### Run any use-case file
-
-```
-python app_uc7.py
-```
-
-Then open:
-
-```
-http://127.0.0.1:5000/
+Wedding_Backend/
+├── app/
+│   ├── main.py              # App Entry Point
+│   ├── core/                # Config, Security, JWT
+│   ├── db/                  # MongoDB Connection & Repositories
+│   ├── models/              # Pydantic Schemas
+│   ├── routers/             # API Endpoints
+│   ├── services/            # Business Logic (Atomic Ops, Migrations)
+│   └── middleware/          # Rate Limiting
+├── .env                     # Secrets
+├── requirements.txt         # Dependencies
+├── start.bat                # Startup Script
+└── README.md                # This file
 ```
 
 ---
 
-## 5. File Structure
+## ❓ Troubleshooting
 
-```
-project/
-│
-├── app_uc1.py
-├── app_uc2.py
-├── app_uc3.py
-├── app_uc4.py
-├── app_uc5.py
-├── app_uc6.py
-├── app_uc7.py
-└── README.md (this file)
-```
+**Q: "Connection Refused" / WinError 10061**
+A: MongoDB is not running. Run `net start MongoDB` in Administrator PowerShell.
 
-Each file contains a complete, independent Flask application implementing one use case.
+**Q: Import Errors**
+A: Ensure your virtual environment is active (`.\venv\Scripts\activate`) and you have installed dependencies (`pip install -r requirements.txt`).
+
+**Q: Password validation error**
+A: Passwords must be at least 8 chars. We use `bcrypt` for secure hashing.
 
 ---
 
-
-
+**Built by Arvind Pandey** | *Enterprise Grade. Production Ready.*
