@@ -1,40 +1,38 @@
-# 🏢 Enterprise Organization Management System
+# Enterprise Organization Management System
 
 > **Production-Ready Multi-Tenant Backend Service**  
 > Built with **FastAPI**, **MongoDB**, and **Enterprise Best Practices**
 
-[![Deploy with Vercel](https://vercel.com/button)](YOUR_VERCEL_LINK_HERE)
+---
+
+## Table of Contents
+1. [Overview](#overview)
+2. [Key Enterprise Features](#key-enterprise-features)
+3. [Technology Stack](#technology-stack)
+4. [Architecture](#architecture)
+5. [Installation & Setup](#installation--setup)
+6. [API Documentation & Examples](#api-documentation--examples)
+7. [Project Structure](#project-structure)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
-## 📖 Table of Contents
-1. [Overview](#-overview)
-2. [Key Enterprise Features](#-key-enterprise-features)
-3. [Technology Stack](#-technology-stack)
-4. [Architecture](#-architecture)
-5. [Installation & Setup](#-installation--setup)
-6. [API Documentation & Examples](#-api-documentation--examples)
-7. [Project Structure](#-project-structure)
-8. [Troubleshooting](#-troubleshooting)
+## Overview
 
----
-
-## 🌟 Overview
-
-This is a robust, enterprise-grade backend service designed for managing organizations in a multi-tenant environment. Unlike simple CRUD applications, this system implements advanced architectural patterns used in real-world SaaS platforms like Stripe or Atlassian.
+This is a robust, enterprise-grade backend service designed for managing organizations in a multi-tenant environment. Unlike simple CRUD applications, this system implements advanced architectural patterns used in real-world SaaS platforms.
 
 It features a **Master Database** for metadata and **Dynamic Collections** for tenant data isolation, ensuring scalability and security.
 
 ---
 
-## 🚀 Key Enterprise Features
+## Key Enterprise Features
 
 ### 1. **Multi-Tenant Architecture**
 -   **Isolation**: Each organization gets its own dynamic MongoDB collection (e.g., `org_google`, `org_amazon`).
 -   **Scalability**: Prevents a single massive collection from slowing down queries.
 -   **Security**: Data leakage between tenants is architecturally minimized.
 
-### 2. **Soft-Delete with Audit Trail** (Compliance Ready)
+### 2. **Soft-Delete with Audit Trail**
 -   **Metadata Retention**: Deleted organizations are flagged (`is_deleted=True`) in the master DB.
 -   **Resource Cleanup**: The actual dynamic collection is **hard-deleted** to free space.
 -   **Audit**: Records `deleted_at` and `deleted_by` (Admin ID) for regulatory compliance.
@@ -51,7 +49,7 @@ It features a **Master Database** for metadata and **Dynamic Collections** for t
 
 ---
 
-## 💻 Technology Stack
+## Technology Stack
 
 -   **Language**: Python 3.9+
 -   **Framework**: FastAPI (High performance, async)
@@ -62,7 +60,7 @@ It features a **Master Database** for metadata and **Dynamic Collections** for t
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ### Database Schema Design
 
@@ -79,7 +77,7 @@ It features a **Master Database** for metadata and **Dynamic Collections** for t
 
 ---
 
-## 🛠 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 -   **Python 3.9+** installed/added to PATH (`python --version`)
@@ -114,7 +112,7 @@ RATE_LIMIT_PER_ORG=100
 
 ---
 
-## 📚 API Documentation & Examples
+## API Documentation & Examples
 
 **Interactive Docs**: Visit [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
 
@@ -167,7 +165,7 @@ RATE_LIMIT_PER_ORG=100
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 Enterprise_Organization_Management_System/
@@ -187,7 +185,7 @@ Enterprise_Organization_Management_System/
 
 ---
 
-## ❓ Troubleshooting
+## Troubleshooting
 
 **Q: "Connection Refused" / WinError 10061**
 A: MongoDB is not running. Run `net start MongoDB` in Administrator PowerShell.

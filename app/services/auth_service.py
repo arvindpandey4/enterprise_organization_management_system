@@ -1,7 +1,4 @@
-"""
-Authentication service layer.
-Handles admin login and JWT token generation with organization context.
-"""
+
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi import HTTPException, status
@@ -13,7 +10,6 @@ from app.core.jwt import create_access_token
 
 
 class AuthService:
-    """Service for authentication business logic."""
     
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
@@ -33,16 +29,14 @@ class AuthService:
         Raises:
             HTTPException: If authentication fails
         """
-        # Get all active organizations
         organizations = await self.org_repo.find_all(limit=1000, include_deleted=False)
         
-        # Search for admin across organization collections
         for org in organizations:
             admin_repo = AdminRepository(self.db, org.collection_name)
             admin = await admin_repo.find_by_email(login_data.email)
             
             if admin:
-                # Verify password
+            if admin:
                 if not verify_password(login_data.password, admin.hashed_password):
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,7 +44,6 @@ class AuthService:
                         headers={"WWW-Authenticate": "Bearer"},
                     )
                 
-                # Verify admin belongs to this organization
                 if admin.organization_id != org.id:
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -58,7 +51,6 @@ class AuthService:
                         headers={"WWW-Authenticate": "Bearer"},
                     )
                 
-                # Generate JWT token with organization context
                 token_data = {
                     "sub": admin.id,
                     "admin_id": admin.id,
@@ -75,7 +67,7 @@ class AuthService:
                     organization_id=org.id
                 )
         
-        # Admin not found in any organization
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",

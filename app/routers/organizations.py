@@ -1,7 +1,4 @@
-"""
-Organization management router.
-Handles CRUD operations for organizations with authentication and authorization.
-"""
+
 from fastapi import APIRouter, Depends, status, Query, Request
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import List, Dict, Any
@@ -22,24 +19,13 @@ router = APIRouter(prefix="/organizations", tags=["Organizations"])
     summary="Create Organization",
     description="Create a new organization with dynamic collection and admin user"
 )
-@limiter.limit("5/minute")  # Limit organization creation
+@limiter.limit("5/minute")
 async def create_organization(
     request: Request,
     org_data: OrganizationCreate,
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """
-    Create a new organization.
-    
-    This endpoint:
-    - Validates organization name uniqueness
-    - Creates organization metadata in master database
-    - Dynamically generates a MongoDB collection (org_<name>)
-    - Creates the admin user in the organization collection
-    - Returns the created organization details
-    
-    **Rate Limited**: 5 requests per minute
-    """
+
     org_service = OrganizationService(db)
     organization = await org_service.create_organization(org_data)
     
@@ -61,12 +47,7 @@ async def list_organizations(
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """
-    List all active organizations.
-    
-    Supports pagination via skip and limit parameters.
-    Only returns non-deleted organizations.
-    """
+
     org_service = OrganizationService(db)
     organizations = await org_service.list_organizations(skip=skip, limit=limit)
     
@@ -96,11 +77,7 @@ async def get_organization(
     organization_id: str,
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """
-    Get organization by ID.
-    
-    Returns detailed information about a specific organization.
-    """
+
     org_service = OrganizationService(db)
     organization = await org_service.get_organization(organization_id)
     
@@ -122,19 +99,7 @@ async def update_organization(
     current_admin: Dict[str, Any] = Depends(get_current_admin),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """
-    Update organization details.
-    
-    **Authentication Required**: Must be the organization's admin.
-    
-    If the organization name is changed:
-    - Creates a new collection with the new name
-    - Migrates all data from the old collection
-    - Updates organization metadata
-    - Deletes the old collection
-    
-    This ensures data integrity during name changes.
-    """
+
     org_service = OrganizationService(db)
     organization = await org_service.update_organization(
         organization_id,
@@ -160,19 +125,7 @@ async def delete_organization(
     current_admin: Dict[str, Any] = Depends(get_current_admin),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """
-    Delete organization.
-    
-    **Authentication Required**: Must be the organization's admin.
-    
-    **Deletion Strategy** (Enterprise Feature #1):
-    - Soft-deletes organization metadata in master database
-    - Records deletion timestamp and admin who performed the action
-    - Hard-deletes the dynamic organization collection
-    - Maintains audit trail for compliance
-    
-    This approach provides traceability while freeing up resources.
-    """
+
     org_service = OrganizationService(db)
     result = await org_service.delete_organization(
         organization_id,

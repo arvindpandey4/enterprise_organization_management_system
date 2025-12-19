@@ -1,15 +1,16 @@
 # Quick Setup Script for Windows
 # Run this script to set up the project quickly
 
-Write-Host "🚀 Setting up Organization Management System..." -ForegroundColor Green
+Write-Host "Setting up Organization Management System..." -ForegroundColor Green
 
 # Check Python installation
 Write-Host "`n📌 Checking Python installation..." -ForegroundColor Cyan
 try {
     $pythonVersion = python --version
-    Write-Host "✅ $pythonVersion found" -ForegroundColor Green
-} catch {
-    Write-Host "❌ Python not found. Please install Python 3.9+ first." -ForegroundColor Red
+    Write-Host "$pythonVersion found" -ForegroundColor Green
+}
+catch {
+    Write-Host "Python not found. Please install Python 3.9+ first." -ForegroundColor Red
     exit 1
 }
 
@@ -17,18 +18,20 @@ try {
 Write-Host "`n📌 Checking MongoDB..." -ForegroundColor Cyan
 $mongoRunning = Get-Process mongod -ErrorAction SilentlyContinue
 if ($mongoRunning) {
-    Write-Host "✅ MongoDB is running" -ForegroundColor Green
-} else {
-    Write-Host "⚠️  MongoDB is not running. Please start MongoDB before running the app." -ForegroundColor Yellow
+    Write-Host "MongoDB is running" -ForegroundColor Green
+}
+else {
+    Write-Host "MongoDB is not running. Please start MongoDB before running the app." -ForegroundColor Yellow
 }
 
 # Create virtual environment
 Write-Host "`n📌 Creating virtual environment..." -ForegroundColor Cyan
 if (Test-Path "venv") {
-    Write-Host "⚠️  Virtual environment already exists. Skipping..." -ForegroundColor Yellow
-} else {
+    Write-Host "Virtual environment already exists. Skipping..." -ForegroundColor Yellow
+}
+else {
     python -m venv venv
-    Write-Host "✅ Virtual environment created" -ForegroundColor Green
+    Write-Host "Virtual environment created" -ForegroundColor Green
 }
 
 # Activate virtual environment
@@ -39,29 +42,30 @@ Write-Host "`n📌 Activating virtual environment..." -ForegroundColor Cyan
 Write-Host "`n📌 Installing dependencies..." -ForegroundColor Cyan
 pip install --upgrade pip
 pip install -r requirements.txt
-Write-Host "✅ Dependencies installed" -ForegroundColor Green
+Write-Host "Dependencies installed" -ForegroundColor Green
 
 # Create .env file if it doesn't exist
 Write-Host "`n📌 Setting up environment configuration..." -ForegroundColor Cyan
 if (Test-Path ".env") {
-    Write-Host "⚠️  .env file already exists. Skipping..." -ForegroundColor Yellow
-} else {
+    Write-Host ".env file already exists. Skipping..." -ForegroundColor Yellow
+}
+else {
     Copy-Item ".env.example" ".env"
-    Write-Host "✅ .env file created from .env.example" -ForegroundColor Green
-    Write-Host "⚠️  IMPORTANT: Update SECRET_KEY in .env file for production!" -ForegroundColor Yellow
+    Write-Host ".env file created from .env.example" -ForegroundColor Green
+    Write-Host "IMPORTANT: Update SECRET_KEY in .env file for production!" -ForegroundColor Yellow
 }
 
 # Generate a secure secret key
 Write-Host "`n📌 Generating secure SECRET_KEY..." -ForegroundColor Cyan
 $secretKey = python -c "import secrets; print(secrets.token_hex(32))"
-Write-Host "✅ Generated SECRET_KEY: $secretKey" -ForegroundColor Green
+Write-Host "Generated SECRET_KEY: $secretKey" -ForegroundColor Green
 Write-Host "   Copy this to your .env file!" -ForegroundColor Yellow
 
 # Summary
 Write-Host "`n" -NoNewline
 Write-Host "=" -NoNewline -ForegroundColor Green
 Write-Host "=" * 60 -ForegroundColor Green
-Write-Host "✅ Setup Complete!" -ForegroundColor Green
+Write-Host "Setup Complete!" -ForegroundColor Green
 Write-Host "=" -NoNewline -ForegroundColor Green
 Write-Host "=" * 60 -ForegroundColor Green
 
@@ -81,10 +85,6 @@ Write-Host "`n📚 Documentation:" -ForegroundColor Cyan
 Write-Host "   - README.md: Complete setup and architecture guide" -ForegroundColor White
 Write-Host "   - API_EXAMPLES.md: Example API requests and responses" -ForegroundColor White
 
-Write-Host "`n🌟 Enterprise Features:" -ForegroundColor Cyan
-Write-Host "   ✨ Soft-delete with audit trail" -ForegroundColor White
-Write-Host "   ✨ Organization-scoped rate limiting" -ForegroundColor White
-Write-Host "   ✨ Dynamic collection management" -ForegroundColor White
-Write-Host "   ✨ JWT authentication with org context" -ForegroundColor White
+
 
 Write-Host "`n"
