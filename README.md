@@ -89,7 +89,7 @@ It features a **Master Database** for metadata and **Dynamic Collections** for t
 
 1.  **Clone the Repository**
     ```powershell
-    cd Wedding_Backend
+    cd Enterprise_Organization_Management_System
     ```
 
 2.  **Run the Setup Script (Windows)**
@@ -170,7 +170,7 @@ RATE_LIMIT_PER_ORG=100
 ## 📂 Project Structure
 
 ```
-Wedding_Backend/
+Enterprise_Organization_Management_System/
 ├── app/
 │   ├── main.py              # App Entry Point
 │   ├── core/                # Config, Security, JWT
