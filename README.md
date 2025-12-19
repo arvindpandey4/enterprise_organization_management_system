@@ -3,7 +3,7 @@
 > **Production-Ready Multi-Tenant Backend Service**  
 > Built with **FastAPI**, **MongoDB**, and **Enterprise Best Practices**
 
-[![Deploy with Vercel](https://vercel.com/button)]()
+[![Deploy with Vercel](https://vercel.com/button)](https://enterprise-organization-management.vercel.app/docs)
 
 ---
 
