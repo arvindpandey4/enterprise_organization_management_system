@@ -47,15 +47,12 @@ class OrganizationService:
             )
         
         try:
-        try:
             org_data = {
                 "name": org_create.name,
                 "description": org_create.description,
                 "collection_name": collection_name,
                 "admin_id": ""
             }
-            
-            organization = await self.org_repo.create(org_data)
             
             organization = await self.org_repo.create(org_data)
             
@@ -70,8 +67,6 @@ class OrganizationService:
             
             admin = await admin_repo.create(admin_data)
             
-            admin = await admin_repo.create(admin_data)
-            
             organization = await self.org_repo.update(
                 organization.id,
                 {"admin_id": admin.id}
@@ -79,7 +74,6 @@ class OrganizationService:
             
             return organization
             
-        except Exception as e:
         except Exception as e:
             if organization:
                 await self.org_repo.hard_delete(organization.id)
@@ -112,13 +106,13 @@ class OrganizationService:
         admin_id: str
     ) -> OrganizationInDB:
 
+        organization = await self.get_organization(org_id)
+
         if organization.admin_id != admin_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to update this organization"
             )
-        
-        update_data = org_update.model_dump(exclude_unset=True)
         
         update_data = org_update.model_dump(exclude_unset=True)
         
@@ -133,12 +127,9 @@ class OrganizationService:
                     detail=f"Organization name '{new_name}' already exists"
                 )
             
-                )
-            
             new_collection_name = self._generate_collection_name(new_name)
             old_collection_name = organization.collection_name
             
-            try:
             try:
                 old_collection = self.db[old_collection_name]
                 new_collection = self.db[new_collection_name]
@@ -156,7 +147,6 @@ class OrganizationService:
                 return organization
                 
             except Exception as e:
-            except Exception as e:
                 if new_collection_name in await self.db.list_collection_names():
                     await self.db.drop_collection(new_collection_name)
                 
@@ -164,7 +154,6 @@ class OrganizationService:
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail=f"Failed to migrate organization data: {str(e)}"
                 )
-        else:
         else:
             organization = await self.org_repo.update(org_id, update_data)
             if not organization:
@@ -176,13 +165,14 @@ class OrganizationService:
     
     async def delete_organization(self, org_id: str, admin_id: str) -> dict:
 
+        organization = await self.get_organization(org_id)
+
         if organization.admin_id != admin_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to delete this organization"
             )
         
-        try:
         try:
             success = await self.org_repo.soft_delete(org_id, admin_id)
             if not success:
